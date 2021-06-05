@@ -2,11 +2,11 @@ from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from datetime import datetime
 
-def create_medical_data(patient_data, user):
-    bdb_root_url = 'http://34.101.231.183:9984/'
+def create_medical_data(patient_data, user_keys):
+    bdb_root_url = 'http://34.101.177.101:9984/'
     bdb = BigchainDB(bdb_root_url)
-    pub_key = user['public_key'] #temporary solution
-    priv_key = user['private_key'] #temporary solution
+    pub_key = user_keys['public_key'] #temporary solution
+    priv_key = user_keys['private_key'] #temporary solution
     now = datetime.now()
     timestamp = now.strftime("%d/%m/%Y %H:%M:%S")
     metadata = {
@@ -36,7 +36,6 @@ def transfer_medical_data(tx_id, user1, user2):
     user1_public_key = user1['public_key']
     user1_priv_key = user1['private_key']
     user2_public_key = user2['public_key']
-    user2_priv_key = user2['private_key']
     tx = bdb.transactions.retrieve(tx_id)
     output = tx['outputs'][0]
     owners_id_before = tx['outputs'][0]['public_keys']

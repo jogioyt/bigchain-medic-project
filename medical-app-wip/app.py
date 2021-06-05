@@ -1,11 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for, sessions
+from flask import Flask, render_template, request, redirect, url_for, session
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from bdb_transaction import *
+from functools import wraps
+import pymongo
 
 app = Flask(__name__)
 app.secret_key = b'\xcc^\x91\xea\x17-\xd0W\x03\xa7\xf8J0\xac8\xc5' 
 
+#Database for account
+client = pymongo.MongoClient('localhost',27017)
+db = client.doctor
+
+# Decorators
+def login_required(f):
+  @wraps(f)
+  def wrap(*args, **kwargs):
+    if 'logged_in' in session:
+      return f(*args, **kwargs)
+    else:
+      return redirect('/login')
+  
+  return wrap
+
+#Routes
 @app.route('/login')
 
 def showLoginPage():
@@ -18,7 +36,7 @@ def showSignUpPage():
 
 #halaman index
 @app.route('/')
-
+@login_required
 def showHomePage():
 	return render_template("index.html")
 
@@ -38,6 +56,8 @@ def showCreateResult():
 		alamat = request.form.get('alamat')
 		gejala = request.form.get('gejala')
 		comment = request.form["comment"]
+		priv_key = request.form["priv_key"]
+		public_key = session['public_key']
 		patient_asset = {
 			'data' : {
 				'patient' : {
@@ -49,6 +69,10 @@ def showCreateResult():
 					'comment' : comment
 				}
 			}
+		}
+		user_keys = {
+			'private_key' : priv_key,
+			'pub_key' : public_key
 		}
 		tx = create_medical_data(patient_asset,user_keys)
 		return render_template("create-result.html",content=tx)
@@ -108,6 +132,12 @@ def showAppendResult():
 				}
 			}
 		}
+		priv_key = request.form["priv_key"]
+		public_key = session['public_key']
+		user_keys = {
+			'private_key' : priv_key,
+			'pub_key' : public_key
+		}
 		tx = update_medical_data(tx_id,patient_asset,user_keys)
 		return render_template("append-result.html",content=tx)
 	else:
@@ -125,6 +155,12 @@ def showSearchBurnPage():
 def showBurn():
 	if request.method == "POST":
 		tx_id = request.form["tx_id"]
+		priv_key = request.form["priv_key"]
+		public_key = session['public_key']
+		user_keys = {
+			'private_key' : priv_key,
+			'pub_key' : public_key
+		}
 		tx = delete_medical_data(tx_id,user_keys)
 		return render_template("burn-result.html",content=tx)
 	else:
@@ -142,14 +178,23 @@ def showSearchTransferPage():
 def showTransferResult():
 	if request.method == "POST":
 		tx_id = request.form["tx_id"]
+		address = request.form["address_id"]
+		'''
 		user2 = generate_keypair()
 		user2_keys = {
 			'public_key': user2.public_key,
 			'private_key': user2.private_key
 		}
+		'''
+		priv_key = request.form["priv_key"]
+		public_key = session['public_key']
+		user_keys = {
+			'private_key' : priv_key,
+			'pub_key' : public_key
+		}
 		bdb_root_url = 'http://34.101.231.183:9984/'
 		bdb = BigchainDB(bdb_root_url)
-		tx = transfer_medical_data(bdb,tx_id,user_keys,user2_keys)
+		tx = transfer_medical_data(tx_id,user_keys,address)
 		return render_template("transfer-result.html",content=tx)
 	else:
 		return redirect(url_for("showSearchTransferPage"))
