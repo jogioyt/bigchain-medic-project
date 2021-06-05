@@ -3,10 +3,14 @@
 {% block content %}
 <h1>{{content}}</h1>
 <h2>Transaction id is: {{tx_id}}</h2>
-<form action = "append" class="form-floating" method ="POST">
+<form action = "append-result" class="form-floating" method ="POST">
     <p>
         <label>Nomor Transaksi</label>
-        <input type="text" class="form-control" id="disabledInput" name="tx_id" placeholder=>
+        <input type="text" class="form-control" name="tx_id">
+    </p>
+    <p>
+        <label>Masukkan Nomor Induk Kependudukan (NIK)</label>
+        <input type="text" class="form-control" name="nik_id">
     </p>
     <p>
         <label>Masukkan Nama Lengkap</label>
