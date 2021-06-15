@@ -3,6 +3,6 @@ This is a WIP on a Medical Record Organization Application with the implementati
 The program currently is still work in progress.
 
 Python modules you may need to get this to work
-1. BigchainDB Driver : pip install bigchaindb-driver
+1. BigchainDB Driver
 2. Gevent version 20.9.0
 3. PyMongo
