@@ -1,48 +1,25 @@
-{% extends "base.html" %}
+{% extends "base-loggedout.html" %}
 
 {% block content %}
-  <div class="card-wrapper">
-    <!--
-    <div class="card">
+<div class="card-wrapper">
+  <div class="card">
 
-      <h1 class="center">Create an Account</h1>
+    <h1 class="center">Log In</h1>
 
-      <form name="signup_form">
+    <form name="login_form" action = "login" method="POST">
 
-        <label for="name">Name</label>
-        <input type="text" name="name" class="field" required>
+      <label for="email">Email</label>
+      <input type="email" name="email" class="field" required>
 
-        <label for="email">Email</label>
-        <input type="email" name="email" class="field" required>
+      <label for="password">Password</label>
+      <input type="password" name="password" class="field" required>
 
-        <label for="password">Password</label>
-        <input type="password" name="password" class="field" required>
+      <p class="error error--hidden"></p>
 
-        <input type="submit" value="Sign Up" class="btn">
-      </form>
-  
-    </div>
-     -->
+      <input type="submit" value="Log In" class="btn">
 
-    <div class="card">
-
-      <h1 class="center">Log In</h1>
-
-      <form name="login_form">
-
-        <label for="email">Email</label>
-        <input type="email" name="email" class="field" required>
-
-        <label for="password">Password</label>
-        <input type="password" name="password" class="field" required>
-
-        <p class="error error--hidden"></p>
-
-        <input type="submit" value="Log In" class="btn">
-      
-      </form>
-      <a href="signup">Create an account</a>
-    </div>
+    </form>
   </div>
-
+</div>
+<a href="showSignUpPage">Create an account</a>
 {% endblock %}
