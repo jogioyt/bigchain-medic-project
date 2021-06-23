@@ -3,7 +3,7 @@ from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from flask.helpers import flash, send_file
 from pymongo import collection
-from bdb_transaction import *
+from bigchaindb_routes import *
 from functools import wraps
 import pymongo
 from selenium import webdriver
@@ -17,83 +17,21 @@ client = pymongo.MongoClient('localhost',27017)
 db = client["doctor"]
 collection = db["users"]
 
-#Routes
+#Login, Sign Up, and Log Out
 @app.route('/showLoginPage')
-
 def showLoginPage():
 	return render_template("login.html")
 
-@app.route('/login', methods = ["POST"])
-def login():
-	get_email = request.form.get("email")
-	get_password = request.form.get("password")
-	login_cred = collection.find_one({"email":get_email})
-	if login_cred:
-		if login_cred['password'] == get_password:
-			get_public_key = login_cred["public_key"]
-			get_name = str(login_cred["name"])
-			session["name"] = get_name
-			session["public_key"] = get_public_key
-			print("Succesful. E-mail: "+str(get_email))
-			return redirect(url_for('showHomePage'))
-		else:
-			return jsonify({ "error": "Login failed" }), 400
-
 @app.route('/showSignUpPage')
-
 def showSignUpPage():
 	return render_template("signup.html")
 
-@app.route('/signup', methods = ["POST"])
-def signup():
-	#get credentials
-	set_name = request.form.get("name")
-	set_email = request.form.get("email")
-	set_password = request.form.get("password")
-	
-	#generate keypair
-	alice = generate_keypair()
-	public_key = alice.public_key
-	private_key = alice.private_key
-	
-	#compile keypair and credentials into a list named "user"
-	user_to_mongo = {
-		"name" : set_name,
-		"email" : set_email,
-		"password" : set_password,
-		"public_key" : public_key
-	}
-	
-	#write user cred to a file.
-	user_to_file = {
-		"name" : set_name,
-		"email" : set_email,
-		"password" : set_password,
-		"public_key" : public_key,
-		"private_key" : private_key
-	}
-	file_name = public_key+".txt"
-	with open(file_name,'w') as file:
-		file.write(json.dumps(user_to_file))
-	file.close()
-
-	#verify if the email already exist on the db
-	if collection.find_one({"email":user_to_mongo['email']}):
-		return jsonify({ "error": "Email address already in use" }), 400
-	
-	#send "user" list to database
-	collection.insert_one(user_to_mongo)
-	flash("Account successfully created. Return to Login Page.")
-	return send_file(file_name, as_attachment=True)
-
 #logout
 @app.route('/logout')
-
 def logout():
 	if "public_key" in session:
 		session.pop("public_key")
 	return redirect(url_for('showLoginPage'))
-
 
 #index page
 @app.route('/')
@@ -110,55 +48,11 @@ def showHomePage():
 def showCreatePage():
 	return render_template("create-form.html")
 
-@app.route("/create-result", methods = ["POST","GET"])
-
-def showCreateResult():
-	if request.method == "POST":
-		nik_id = request.form.get("nik_id")
-		nama = request.form.get("nama")
-		ttl = request.form.get("ttl")
-		alamat = request.form.get("alamat")
-		gejala = request.form.get("gejala")
-		comment = request.form.get("comment")
-		private_key = request.form.get("private_key")
-		public_key = session['public_key']
-		patient_asset = {
-			'data' : {
-				'patient' : {
-					'nik_id' : nik_id,
-					'nama' : nama,
-					'ttl' : ttl,
-					'alamat' : alamat,
-					'gejala' : gejala,
-					'comment' : comment
-				}
-			}
-		}
-		user_keys = {
-			'private_key' : private_key,
-			'public_key' : public_key
-		}
-		tx = create_medical_data(patient_asset,user_keys)
-		print(tx)
-		return render_template("create-result.html",content=tx)
-	else:
-		return redirect(url_for("showCreatePage "))
 #route to search
 @app.route("/search-form")
 
 def showSearchPage():
 	return render_template("search-form.html")
-
-@app.route("/search-result", methods = ["POST","GET"])
-
-def showSearchResult():
-	if request.method == "POST":
-		tx_id = request.form.get("tx_id")
-		tx = retrieve_medical_data(tx_id)
-		print(tx)
-		return render_template("search-result.html",content=tx)
-	else:
-		return redirect(url_for("showSearchPage"))
 
 #route to append
 @app.route("/search-append")
@@ -175,40 +69,6 @@ def showAppendForm():
 	else:
 		return redirect(url_for("showSearchPage"))
 
-@app.route("/append-result", methods = ["POST","GET"])
-def showAppendResult():
-	if request.method == "POST":
-		nik_id = request.form.get('nik_id')
-		nama = request.form.get('nama')
-		ttl = request.form.get('ttl')
-		alamat = request.form.get('alamat')
-		gejala = request.form.get('gejala')
-		comment = request.form.get("comment")
-		tx_id = request.form.get('tx_id')
-		patient_asset = {
-			'id': tx_id,
-			'data' : {
-				'patient' : {
-					'nik_id' : nik_id,
-					'nama' : nama,
-					'ttl' : ttl,
-					'alamat' : alamat,
-					'gejala' : gejala,
-					'comment' : comment
-				}
-			}
-		}
-		private_key = request.form.get("private_key")
-		public_key = session['public_key']
-		user_keys = {
-			'private_key' : private_key,
-			'public_key' : public_key
-		}
-		tx = update_medical_data(tx_id,patient_asset,user_keys)
-		return render_template("append-result.html",content=tx)
-	else:
-		return redirect(url_for("showSearchAppendPage"))
-
 #route to burn
 
 @app.route("/search-burn")
@@ -216,37 +76,12 @@ def showAppendResult():
 def showSearchBurnPage():
 	return render_template("search-burn.html")
 
-@app.route("/burn-result", methods = ["POST","GET"])
-
-def showBurn():
-	if request.method == "POST":
-		tx_id = request.form.get("tx_id")
-		private_key = request.form.get("private_key")
-		tx = delete_medical_data(tx_id,private_key)
-		print(tx)
-		return render_template("burn-result.html",content=tx)
-	else:
-		return redirect(url_for("showSearchBurnPage"))
-
 #route to transfer
 
 @app.route("/search-transfer")
 
 def showSearchTransferPage():
 	return render_template("search-transfer.html")
-
-@app.route("/transfer-result", methods = ["POST"])
-
-def showTransferResult():
-	if request.method == "POST":
-		tx_id = request.form.get("tx_id")
-		address_id = request.form.get("address_id")
-		private_key = request.form.get("private_key")
-		tx = transfer_medical_data(tx_id,private_key,address_id)
-		print(tx)
-		return render_template("transfer-result.html",content=tx)
-	else:
-		return redirect(url_for("showSearchTransferPage"))
 
 if __name__== "__main__":
 	app.run(host='0.0.0.0', port="5000", debug=True)
