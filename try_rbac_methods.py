@@ -12,8 +12,6 @@ bdb = BigchainDB(bdb_root_url)
 def createGroup(namespace, admin_keys):
     ns = namespace+'.admin'
     adminGroupAsset = {
-        'ns': ns,
-        'name' : 'admin',
         'data':{
             'ns':ns,
             'name': 'admin'
@@ -27,8 +25,6 @@ def createGroup(namespace, admin_keys):
 
 def createApp(namespace, admin_keys, adminGroupId):
     appAsset = {
-        'ns' : namespace,
-        'name' : namespace,
         'data': {
             'ns' : namespace,
             'name' : namespace
@@ -44,11 +40,13 @@ def createApp(namespace, admin_keys, adminGroupId):
 def createUser(namespace, adminKeyPair, userTypeId, userTypeName, userPublicKey):
     ns_asset = namespace+"."+userTypeName
     asset = {
-        'ns': ns_asset,
-        'link' : userTypeId,
-        'createdBy': adminKeyPair["public_key"],
-        'type' : userTypeName,
-        'keyword':'UserAsset'
+        'data':{
+            'ns': ns_asset,
+            'link' : userTypeId,
+            'createdBy': adminKeyPair["public_key"],
+            'type' : userTypeName,
+            'keyword':'UserAsset'          
+        }
     }
     date = datetime.now()
     timestamp = date.strftime("%d/%m/%Y %H:%M:%S")
@@ -68,9 +66,6 @@ def createUser(namespace, adminKeyPair, userTypeId, userTypeName, userPublicKey)
 def createType(adminKeys, namespace, typeName, appId, canLinkAssetId):
     ns_asset = namespace+"."+typeName
     asset = {
-        'ns': ns_asset,
-        'link': appId,
-        'name' : typeName,
         'data':{
             'ns': ns_asset,
             'link': appId,
@@ -84,11 +79,25 @@ def createType(adminKeys, namespace, typeName, appId, canLinkAssetId):
     return typeTx
 
 #function create type instance that are being used setting an user to become either "proposal" or "vote"
-def createTypeInstance(namespace, keypair, typeName, typeId, metadata):
+def createTypeInstance(namespace, keypair, typeName, typeId):
     ns_asset = namespace+"."+typeName
+    date = datetime.now()
+    timestamp = date.strftime("%d/%m/%Y %H:%M:%S")
     asset = {
-        'ns' : ns_asset,
-        'link' : typeId
+        'data':{
+            'ns' : ns_asset,
+            'link' : typeId
+        }
     }
+    if(typeName == "proposal"):
+        metadata = {
+            'name':'new proposal by user: '+keypair["public_key"],
+            'timestamp':timestamp
+        }
+    elif(typeName == "vote"):
+        metadata = {
+            'name':'new vote by user: '+keypair["public_key"],
+            'timestamp':timestamp
+        }
     tx = create_transaction(keypair, asset, metadata)
     return tx
