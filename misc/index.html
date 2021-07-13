@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <title>Simple CRAB Apps</title>
+    </head>
+    
+    <body>
+        <h1 data-position="header">Percobaan Aplikasi CRAB.</h1>
+        
+        <section data-position="add-quote">
+          <h2>Tambah Data</h2>
+          <form action="/quotes" method="POST">
+            <input type="text" placeholder="name" name="name">
+            <input type="text" placeholder="quote" name="quote">
+            <button type="submit">Submit</button>
+          </form>
+        </section>
+        
+        <section data-position="update-quote">
+          <div>
+            <h2>Update Data</h2>
+            <p>
+              Ubah kembali data pada Block yang sudah dibuat
+            </p>
+            <button id="update-button">Update Data</button>
+          </div>
+        </section>
+        
+        <section data-position="delete-quote">
+          <div>
+            <h2>Hapus Data!</h2>
+        <p>
+          Hapus Data pada Block yang sudah dibuat
+        </p>
+        <button id="delete-button">Hapus Data</button>
+      </div>
+      <div id="message"></div>
+    </section>
+
+    <section data-position="quotes">
+      <h2>Quotes</h2>
+
+      <ul class="quotes">
+      </ul>
+    </section>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="/main.js"></script>
+    
+  </body>
+</html>

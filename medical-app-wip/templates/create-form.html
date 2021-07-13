@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+<form action = "create-result" class="form-floating" method ="POST">
+    <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" name="nik_id"></textarea>
+        <label for="floatingTextarea2">Nomor KTP/ID</label>
+    </div>
+    <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" name="nama"></textarea>
+        <label for="floatingTextarea2">Nama sesuai KTP/ID</label>
+    </div>
+    <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" name="ttl"></textarea>
+        <label for="floatingTextarea2">Tempat dan Tanggal Lahir sesuai KTP/ID</label>
+    </div>
+    <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" name="alamat"></textarea>
+        <label for="floatingTextarea2">Alamat sesuai KTP/ID</label>
+    </div>
+    <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" name="gejala"></textarea>
+        <label for="floatingTextarea2">Gejala</label>
+    </div>
+    <!--
+    <p>
+        <label>Masukkan Nama Lengkap</label>
+        <input type="text" class="form-control" name="nik_id">
+    </p>
+    <p>
+        <label>Masukkan Nama Lengkap</label>
+        <input type="text" class="form-control" name="nama">
+    </p>
+    <p>
+        <label>Masukkan Tempat dan Tanggal Lahir</label>
+        <input type="text" class="form-control" name="ttl">
+    </p>
+    <p>
+        <label>Masukkan Alamat</label>
+        <input type="text" class="form-control" name="alamat">
+    </p>
+    <p>
+        <label>Masukkan Gejala</label>
+        <input type="text" class="form-control" name="gejala">
+    </p>
+    -->
+    <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" name="comment" style="height: 100px"></textarea>
+        <label for="floatingTextarea2">Komentar</label>
+    </div>
+    <div>
+        <label>Masukkan kode transaksi</label>
+        <input type="password" name="private_key">
+    </div> 
+    <input type="submit" class="btn btn-primary btn-lg" value="Kirim">
+</form>
+    {% endblock %}
