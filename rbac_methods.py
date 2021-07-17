@@ -37,7 +37,7 @@ def createApp(namespace, admin_keys, adminGroupId):
 
 #function createUser
 def createUser(namespace, adminKeyPair, userTypeId, userTypeName, userPublicKey, userMetadata):
-    ns_asset = namespace+"."+userTypeName
+    ns_asset = namespace+"."+userTypeName 
     asset = {
         'data':{
             'ns': ns_asset,

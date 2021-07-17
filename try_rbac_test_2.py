@@ -117,7 +117,7 @@ def main():
             'userType':'admin'
         }
     }
-    user2_input = createUser(namespace, admin_keys, tribe1Id, 'tribe2', user2_keys["public_key"])
+    user2_input = createUser(namespace, admin_keys, tribe1Id, 'tribe2', user2_keys["public_key"], user2Metadata)
     print("User 2 details:")
     print(user2_input)
     print("=============================")
@@ -138,7 +138,7 @@ def main():
             'userType':'admin'
         }
     }
-    user3_input = createUser(namespace, admin_keys, tribe1Id, 'tribe2', user3_keys["public_key"])
+    user3_input = createUser(namespace, admin_keys, tribe1Id, 'tribe2', user3_keys["public_key"], user3Metadata)
     print("User 3 details:")
     print(user3_input)
     print("=============================")

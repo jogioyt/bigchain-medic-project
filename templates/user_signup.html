@@ -1,0 +1,32 @@
+{% extends "base-loggedout.html" %}
+
+{% block content %}
+  <div class="card-wrapper">
+
+    <div class="card">
+
+      <h1 class="center">Create an Account</h1>
+
+      <form name="signup_form" action="user_signup" method="POST">
+
+        <label for="name">Name</label>
+        <input type="text" name="name" class="field" required>
+
+        <label for="email">Email</label>
+        <input type="email" name="email" class="field" required>
+
+        <label for="password">Password</label>
+        <input type="password" name="password" class="field" required>
+
+        <input type="submit" value="Sign Up" class="btn">
+      </form>
+    </div>
+  </div>
+  <script>
+    var email = document.getElementsByName('email');
+    var password = document.getElementsByName('password');
+    localStorage.setItem('email', email.value);
+    localStorage.setItem('password',password.value);
+  </script>
+
+{% endblock %}

@@ -1,6 +1,138 @@
-{% extends "form-base.html" %}
+{% extends "base.html" %}
 {% block title %}{% endblock %}
 {% block content %}
-<div>{{content}}</div>
+<div>
+    {{content}}
+</div>
 <h2>Transaction id is: {{tx_id}}</h2>
+<form action = "append-result" class="form-floating" method ="POST">
+    <!--Identitas Pasien untuk Asset-->
+    <h2>Identitas Pasien</h2>
+    <p>
+        <label>Masukkan Nomor ID Pasien</label>
+        <input type="text" class="form-control" name="nik_id" id="nik_id">
+    </p>
+    <p>
+        <label>Masukkan Nama Lengkap Pasien Sesuai ID</label>
+        <input type="text" class="form-control" name="nama" id="nama">
+    </p>
+    <p>
+        <label>Tempat Lahir</label>
+        <input type="text" class="form-control" id="birthplace" name="birthplace">
+    </p>
+    <p>
+        <label>Tanggal Lahir</label>
+        <input type="date" name ="birthday" id="birthday">
+    </p>
+    <p>
+        <label>Masukkan Alamat Pasien Sesuai ID</label>
+        <input type="text" class="form-control" id="alamat "name="alamat">
+    </p>
+    <p>
+        <label>Pilih Jenis Kelamin Pasien</label>
+        <select class="custom-select mr-sm-2" name="sex" id ="sex">
+            <option value="" selected>--Pilih Jenis Kelamin--</option>
+            <option value="laki-laki">Laki-Laki</option>
+            <option value="perempuan">Perempuan</option>
+        </select>      
+    </p>
+    <p>
+        <label>Golongan Darah Pasien</label>
+        <select class="custom-select mr-sm-2" name="gol_darah" id ="gol_darah">
+            <option value="" selected>--Pilih Golongan Darah--</option>
+            <option value="A+">A+</option>
+            <option value="B+">B+</option>
+            <option value="AB+">AB+</option>
+            <option value="O+">O+</option>
+            <option value="A-">A-</option>
+            <option value="B-">B-</option>
+            <option value="AB-">AB-</option>
+            <option value="O-">O-</option>
+        </select>
+    </p>
+    
+    <!--Anamnesis Pasien untuk metadata-->
+    <h2>Anamnesis Pasien</h2>
+    <p>
+        <label>Keluhan</label>
+        <textarea class="form-control" id="keluhan" placeholder="Keluhan" name="keluhan" style="height: 100px"></textarea>
+    </p>
+    <p>
+        <label>Riwayat Penyakit Keluarga</label>
+        <textarea class="form-control" id="riwayat_penyakit_keluarga" placeholder="Riwayat Penyakit Keluarga" name="riwayat_penyakit_keluarga" style="height: 100px"></textarea>
+    </p>
+    <p>
+        <label>Riwayat Penyakit Individu Sebelumnya</label>
+        <textarea class="form-control" id="riwayat_penyakit_individu" placeholder="Riwayat Penyakit Individu" name="riwayat_penyakit_individu" style="height: 100px"></textarea>
+    </p>
+    
+    <!--Hasil Diagnosa
+    Consider bagian Umum dipecah menjadi tekanan darah, dan bpm-->
+    <h2>Hasil Diagnosa</h2>
+    <p>
+        <label>Hasil Pemeriksaan Fisik - Umum</label>
+        <textarea class="form-control" id="hasil_fisik" placeholder="Hasil Pemeriksaan Fisik Umum" name="hasil_fisik" style="height: 100px"></textarea>
+    </p>
+    <p>
+        <label>Hasil Pemeriksaan Fisik - Organ</label>
+        <textarea class="form-control" id="hasil_organ" placeholder="Hasil Pemeriksaan Fisik Organ" name="hasil_organ" style="height: 100px"></textarea>
+    </p>
+    <p>
+        <label>Hasil Diagnosa Kerja</label>
+        <textarea class="form-control" id="hasil_kerja" placeholder="Hasil Diagnosa Kerja" name="hasil_kerja" style="height: 100px"></textarea>
+    </p>
+
+    <!--Rencana Penatalaksanaan Pasien-->
+    <h2>Rencana Penatalaksanaan Pasien</h2>
+    <p>
+        <label>Rencana Kegiatan</label>
+        <input type="text" class="form-control" id="rencana_kegiatan" name="rencana_kegiatan">
+    </p>
+    <p>
+        <label>Waktu</label>
+        <input type="text" class="form-control" id="rencana_waktu" name="rencana_waktu">
+    </p>
+    <p>
+        <label>Hasil yang diharapkan</label>
+        <input type="text" class="form-control" id="rencana_hasil" name="rencana_hasil">
+    </p>
+    <p>
+        <label>Komentar Rencana Penanganan Pasien</label>
+        <textarea class="form-control" placeholder="Komentar" id = "rencana_comment" name="rencana_comment" style="height: 100px"></textarea>
+    </p>
+
+    <!--Hasil Penatalaksanaan Pasien-->
+    <h2>Hasil Penanganan Pasien</h2>
+    <p>
+        <label>Tanggal</label>
+        <input type="date" name ="tanggal_treatment" id="tanggal_treatment">
+    </p>
+    <p>
+        <label>Tindakan yang dilakukan</label>
+        <input type="text" class="form-control" id="tindakan_treatment" name="tindakan_treatment">
+    </p>
+    <p>
+        <label>Diagnosa Hasil Penanganan</label>
+        <input type="text" class="form-control" id="diagnosa_treatment" name="diagnosa_treatment">
+    </p>
+    <p>
+        <label>Faktor Pendukung Terselesaikan Masalah Kesehatan Pasien</label>
+        <input type="text" class="form-control" id="faktor_plus_treatment" name="faktor_plus_treatment">
+    </p>
+    <p>
+        <label>Faktor Penghambat Terselesaikan Masalah Kesehatan Pasien</label>
+        <input type="text" class="form-control" id="faktor_minus_treatment" name="faktor_minus_treatment">
+    </p>
+    <p>
+        <label>Komentar Hasil Penanganan Pasien</label>
+        <textarea class="form-control" placeholder="Komentar" id="comment_treatment" name="comment_treatment" style="height: 100px"></textarea>
+    </p>
+    <!--Submit-->
+    <h2>Konfirmasi Pengiriman Data</h2>
+    <div>
+        <label>Masukkan kode transaksi</label>
+        <input type="password" name="private_key">
+    </div> 
+    <input type="submit" class="btn btn-primary btn-lg" value="Kirim">
+</form>
 {% endblock %}

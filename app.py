@@ -1,10 +1,10 @@
-from typing_extensions import Required
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from flask.helpers import flash, send_file
 from pymongo import collection
 from bdb_transaction import *
+from rbac_methods import *
 import pymongo
 import json
 from datetime import datetime
@@ -24,38 +24,40 @@ namespace = "medical-app"
 
 #Database for account
 client = pymongo.MongoClient('localhost',27017)
-db = client["doctor"]
-collection = db["users"]
+db = client["medical_app"]
 
-#Routes
-@app.route('/showLoginPage')
+def signup(details_to_mongo, details_to_file):
+	file_name = details_to_mongo["public_key"]+".txt"
+	with open(file_name,'w') as file:
+		file.write(json.dumps(details_to_file))
+	file.close()
 
-def showLoginPage():
-	return render_template("login.html")
+	#verify if the email already exist on the db
+	if collection.find_one({"email":details_to_mongo['email']}):
+		return jsonify({ "error": "Email address already in use" }), 400
+	
+	#send "user" list to database
+	collection.insert_one(details_to_mongo)
 
-@app.route('/login', methods = ["POST"])
-def login():
-	get_email = request.form.get("email")
-	get_password = request.form.get("password")
-	login_cred = collection.find_one({"email":get_email})
-	if login_cred:
-		if login_cred['password'] == get_password:
-			get_public_key = login_cred["public_key"]
-			get_name = str(login_cred["name"])
-			session["name"] = get_name
-			session["public_key"] = get_public_key
-			print("Succesful. E-mail: "+str(get_email))
-			return redirect(url_for('showHomePage'))
-		else:
-			return jsonify({ "error": "Login failed" }), 400
+	#insert the rbac's createUser transaction here
+	flash("Account successfully created. Return to Login Page.")
+	return send_file(file_name, as_attachment=True)
 
-@app.route('/showSignUpPage')
+#Routes for Admin
+@app.route('/dashboard')
+def dashboard():
+	return render_template("index_admin.html")
 
-def showSignUpPage():
-	return render_template("signup.html")
+@app.route('/showAdminSignUpPage')
+def showAdminSignUpPage():
+	return render_template("admin_signup.html")
 
-@app.route('/signup', methods = ["POST"])
-def signup():
+@app.route('/showAdminLoginPage')
+def showAdminLoginPage():
+	return render_template("admin_login.html")
+
+@app.route('/admin_signUp')
+def admin_signup():
 	#get credentials
 	set_name = request.form.get("name")
 	set_email = request.form.get("email")
@@ -71,7 +73,8 @@ def signup():
 		"name" : set_name,
 		"email" : set_email,
 		"password" : set_password,
-		"public_key" : public_key
+		"public_key" : public_key,
+		"role" : "admin"
 	}
 	
 	#write user cred to a file.
@@ -80,7 +83,87 @@ def signup():
 		"email" : set_email,
 		"password" : set_password,
 		"public_key" : public_key,
-		"private_key" : private_key
+		"private_key" : private_key,
+		"role" : "admin"
+	}
+	signup(user_to_mongo,user_to_file)
+	session["role"] = "admin"
+	session["name"] = set_name
+	session["public_key"] = public_key
+	return redirect(url_for('showHomePage'))
+	"""
+	file_name = public_key+".txt"
+	with open(file_name,'w') as file:
+		file.write(json.dumps(user_to_file))
+	file.close()
+
+	#verify if the email already exist on the db
+	if db[].find_one({"email":user_to_mongo['email']}):
+		return jsonify({ "error": "Email address already in use" }), 400
+	
+	#send "user" list to database
+	collection.insert_one(user_to_mongo)
+
+	#insert the rbac's createUser transaction here
+	flash("Account successfully created. Return to Login Page.")
+	return send_file(file_name, as_attachment=True)
+	"""
+#Routes for User
+@app.route('/showUserLoginPage')
+def showUserLoginPage():
+	return render_template("user_login.html")
+
+@app.route('/login', methods = ["POST"])
+def login():
+	get_email = request.form.get("email")
+	get_password = request.form.get("password")
+	login_cred = db["accounts"].find_one({"email":get_email})
+	if login_cred:
+		if login_cred['password'] == get_password:
+			get_public_key = login_cred["public_key"]
+			get_name = str(login_cred["name"])
+			get_role = str(login_cred["role"])
+			session["name"] = get_name
+			session["public_key"] = get_public_key
+			session["role"] = get_role
+			print("Succesful. E-mail: "+str(get_email))
+			return redirect(url_for('showHomePage'))
+		else:
+			return jsonify({ "error": "Login failed" }), 400
+
+@app.route('/showUserSignUpPage')
+def showUserSignUpPage():
+	return render_template("user_signup.html")
+
+@app.route('/user_signup', methods = ["POST"])
+def user_signup():
+	#get credentials
+	set_name = request.form.get("name")
+	set_email = request.form.get("email")
+	set_password = request.form.get("password")
+	
+	#generate keypair
+	alice = generate_keypair()
+	public_key = alice.public_key
+	private_key = alice.private_key
+	
+	#compile keypair and credentials into a list named "user"
+	user_to_mongo = {
+		"name" : set_name,
+		"email" : set_email,
+		"password" : set_password,
+		"public_key" : public_key,
+		"role" : "doctor"
+	}
+	
+	#write user cred to a file.
+	user_to_file = {
+		"name" : set_name,
+		"email" : set_email,
+		"password" : set_password,
+		"public_key" : public_key,
+		"private_key" : private_key,
+		"role" : "doctor"
 	}
 	file_name = public_key+".txt"
 	with open(file_name,'w') as file:
@@ -97,32 +180,33 @@ def signup():
 	#insert the rbac's createUser transaction here
 	flash("Account successfully created. Return to Login Page.")
 	return send_file(file_name, as_attachment=True)
-
+ 
 #logout
 @app.route('/logout')
-
 def logout():
 	if "public_key" in session:
 		session.pop("public_key")
-	return redirect(url_for('showLoginPage'))
+	return redirect(url_for('showUserLoginPage'))
 
 #index page
 @app.route('/')
 def showHomePage():
-	if "public_key" in session:
-		welcome = "Hello! " + session["name"]
-		return render_template("index.html", content = welcome)
+	if "role" in session:
+		if session["role"] == "doctor":
+			welcome = "Hello! " + session["name"]
+			return render_template("user_index.html", content = welcome)
+		elif session["role"] == "admin":
+			welcome = "Hello! " + session["name"]
+			return render_template("admin_index.html", content = welcome)
 	else:
-		return redirect(url_for('showLoginPage'))
+		return redirect(url_for('showUserLoginPage'))
 
 #route to create
 @app.route("/create-form")
-
 def showCreatePage():
 	return render_template("create-form.html")
 
 @app.route("/create-result", methods = ["POST","GET"])
-
 def showCreateResult():
 	if request.method == "POST":
 		#Data untuk asset
@@ -225,12 +309,10 @@ def showCreateResult():
 		return redirect(url_for("showCreatePage "))
 #route to search
 @app.route("/search-form")
-
 def showSearchPage():
 	return render_template("search-form.html")
 
 @app.route("/search-result", methods = ["POST","GET"])
-
 def showSearchResult():
 	if request.method == "POST":
 		tx_id = request.form.get("tx_id")
@@ -242,7 +324,6 @@ def showSearchResult():
 
 #route to append
 @app.route("/search-append")
-
 def showSearchAppendPage():
 	return render_template("search-append.html")
 
@@ -365,12 +446,10 @@ def showAppendResult():
 #route to burn
 
 @app.route("/search-burn")
-
 def showSearchBurnPage():
 	return render_template("search-burn.html")
 
 @app.route("/burn-result", methods = ["POST","GET"])
-
 def showBurn():
 	if request.method == "POST":
 		tx_id = request.form.get("tx_id")
@@ -390,12 +469,10 @@ def showBurn():
 #route to transfer
 
 @app.route("/search-transfer")
-
 def showSearchTransferPage():
 	return render_template("search-transfer.html")
 
 @app.route("/transfer-result", methods = ["POST"])
-
 def showTransferResult():
 	if request.method == "POST":
 		tx_id = request.form.get("tx_id")
