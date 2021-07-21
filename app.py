@@ -1,13 +1,18 @@
+#Dependecies
+from os import name
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from flask.helpers import flash, send_file
-from pymongo import collection
-from bdb_transaction import *
-from rbac_methods import *
 import pymongo
 import json
 from datetime import datetime
+
+#Homemade Modules
+from bdb_transaction import *
+from rbac_methods import *
+from getAssets import *
+
 
 app = Flask(__name__)
 app.secret_key = b'\xcc^\x91\xea\x17-\xd0W\x03\xa7\xf8J0\xac8\xc5' 
@@ -16,57 +21,84 @@ app.secret_key = b'\xcc^\x91\xea\x17-\xd0W\x03\xa7\xf8J0\xac8\xc5'
 bdb_root_url = 'http://localhost:9984/'
 bdb = BigchainDB(bdb_root_url)
 
+#rbac stuff
 #initiate namespace
 namespace = "medical-app"
 
-#get admin keys to create users
-#get typeId to define the object of hospital, doctors, and patient
+#admin type
+admin_type = getAdminType()
+admin_type_id = admin_type["id"]
+
+#app details
+app_tx = getApp()
+app_tx_id = admin_type["id"]
+
+#get typeId to define the object of hospital, ... 
+hospital_type = getHospitalType()
+hospital_type_id = hospital_type["id"]
+
+# ...doctors, ... 
+doctor_type = getDoctorType()
+doctor_type_id = doctor_type["id"]
+
+# ...and patient
+patient_type = getPatientType()
+patient_type_id = patient_type["id"]
 
 #Database for account
 client = pymongo.MongoClient('localhost',27017)
 db = client["medical_app"]
-
-def signup(details_to_mongo, details_to_file):
-	file_name = details_to_mongo["public_key"]+".txt"
-	with open(file_name,'w') as file:
-		file.write(json.dumps(details_to_file))
-	file.close()
-
-	#verify if the email already exist on the db
-	if collection.find_one({"email":details_to_mongo['email']}):
-		return jsonify({ "error": "Email address already in use" }), 400
-	
-	#send "user" list to database
-	collection.insert_one(details_to_mongo)
-
-	#insert the rbac's createUser transaction here
-	flash("Account successfully created. Return to Login Page.")
-	return send_file(file_name, as_attachment=True)
 
 #Routes for Admin
 @app.route('/dashboard')
 def dashboard():
 	return render_template("index_admin.html")
 
-@app.route('/showAdminSignUpPage')
-def showAdminSignUpPage():
+@app.route('/AdminSignUpPage')
+def AdminSignUpPage():
 	return render_template("admin_signup.html")
 
-@app.route('/showAdminLoginPage')
-def showAdminLoginPage():
+@app.route('/AdminLoginPage')
+def AdminLoginPage():
 	return render_template("admin_login.html")
 
-@app.route('/admin_signUp')
+@app.route('/admin_login', methods = ["POST"])
+def admin_login():
+	get_email = request.form.get("email")
+	get_password = request.form.get("password")
+	login_cred = db["admin_accounts"].find_one({"email":get_email})
+	if login_cred:
+		if login_cred['password'] == get_password:
+			get_public_key = login_cred["public_key"]
+			get_name = str(login_cred["name"])
+			get_role = str(login_cred["role"])
+			session["name"] = get_name
+			session["public_key"] = get_public_key
+			session["role"] = get_role
+			print("Succesful. E-mail: "+str(get_email))
+			return redirect(url_for('dashboard'))
+		else:
+			return jsonify({ "error": "Login failed" }), 400
+
+@app.route('/admin_signup')
 def admin_signup():
 	#get credentials
 	set_name = request.form.get("name")
 	set_email = request.form.get("email")
 	set_password = request.form.get("password")
 	
+	#verify if the email already exist on the db
+	if db["admin_accounts"].find_one({"email":set_email}):
+		return jsonify({ "error": "Email address already in use" }), 400
+
 	#generate keypair
 	alice = generate_keypair()
 	public_key = alice.public_key
 	private_key = alice.private_key
+	alice_keypairs = {
+		'public_key': public_key,
+		'private_key': private_key
+	}
 	
 	#compile keypair and credentials into a list named "user"
 	user_to_mongo = {
@@ -76,7 +108,25 @@ def admin_signup():
 		"public_key" : public_key,
 		"role" : "admin"
 	}
+
+	#apply rbac createUser and createTypeInstance
+	admin_user_rbac = createUser(namespace, alice_keypairs, admin_type_id, 'admin', public_key, user_to_mongo)
+	admin_instance_rbac = createTypeInstance(namespace, alice_keypairs, 'admin', admin_type_id, user_to_mongo)
+
+	admin_user_rbac_id = admin_user_rbac["id"]
+	admin_instance_rbac_id = admin_instance_rbac["id"]
+
+	rbac = {
+		"user_rbac_id": admin_user_rbac_id,
+		"instance_rbac_id": admin_instance_rbac_id
+	}
+
+	#add the rbac to mongo dict
+	user_to_mongo.update(rbac)
 	
+	#send "user" list to database
+	db["admin_accounts"].insert_one(user_to_mongo)
+
 	#write user cred to a file.
 	user_to_file = {
 		"name" : set_name,
@@ -84,40 +134,30 @@ def admin_signup():
 		"password" : set_password,
 		"public_key" : public_key,
 		"private_key" : private_key,
-		"role" : "admin"
+		"role" : "admin",
 	}
-	signup(user_to_mongo,user_to_file)
 	session["role"] = "admin"
 	session["name"] = set_name
 	session["public_key"] = public_key
-	return redirect(url_for('showHomePage'))
-	"""
 	file_name = public_key+".txt"
 	with open(file_name,'w') as file:
 		file.write(json.dumps(user_to_file))
 	file.close()
 
-	#verify if the email already exist on the db
-	if db[].find_one({"email":user_to_mongo['email']}):
-		return jsonify({ "error": "Email address already in use" }), 400
-	
-	#send "user" list to database
-	collection.insert_one(user_to_mongo)
-
 	#insert the rbac's createUser transaction here
 	flash("Account successfully created. Return to Login Page.")
 	return send_file(file_name, as_attachment=True)
-	"""
+
 #Routes for User
-@app.route('/showUserLoginPage')
-def showUserLoginPage():
+@app.route('/UserLoginPage')
+def UserLoginPage():
 	return render_template("user_login.html")
 
-@app.route('/login', methods = ["POST"])
-def login():
+@app.route('/user_login', methods = ["POST"])
+def user_login():
 	get_email = request.form.get("email")
 	get_password = request.form.get("password")
-	login_cred = db["accounts"].find_one({"email":get_email})
+	login_cred = db["doctor_accounts"].find_one({"email":get_email})
 	if login_cred:
 		if login_cred['password'] == get_password:
 			get_public_key = login_cred["public_key"]
@@ -131,7 +171,7 @@ def login():
 		else:
 			return jsonify({ "error": "Login failed" }), 400
 
-@app.route('/showUserSignUpPage')
+@app.route('/UserSignUpPage')
 def showUserSignUpPage():
 	return render_template("user_signup.html")
 
@@ -142,10 +182,18 @@ def user_signup():
 	set_email = request.form.get("email")
 	set_password = request.form.get("password")
 	
+	#verify if the email already exist on the db
+	if db["doctor_accounts"].find_one({"email":set_email}):
+		return jsonify({ "error": "Email address already in use" }), 400
+
 	#generate keypair
-	alice = generate_keypair()
-	public_key = alice.public_key
-	private_key = alice.private_key
+	bob = generate_keypair()
+	public_key = bob.public_key
+	private_key = bob.private_key
+	bob_keypairs = {
+		'public_key': public_key,
+		'private_key': private_key
+	}
 	
 	#compile keypair and credentials into a list named "user"
 	user_to_mongo = {
@@ -155,7 +203,25 @@ def user_signup():
 		"public_key" : public_key,
 		"role" : "doctor"
 	}
+
+	#apply rbac createUser and createTypeInstance
+	doctor_user_rbac = createUser(namespace, bob_keypairs, admin_type_id, 'doctor', public_key, user_to_mongo)
+	doctor_instance_rbac = createTypeInstance(namespace, bob_keypairs, 'doctor', admin_type_id, user_to_mongo)
+
+	doctor_user_rbac_id = doctor_user_rbac["id"]
+	doctor_instance_rbac_id = doctor_instance_rbac["id"]
+
+	rbac = {
+		"user_rbac_id": doctor_user_rbac_id,
+		"instance_rbac_id": doctor_instance_rbac_id
+	}
+
+	#add the rbac to mongo dict
+	user_to_mongo.update(rbac)
 	
+	#send "user" list to database
+	db["doctor_accounts"].insert_one(user_to_mongo)
+
 	#write user cred to a file.
 	user_to_file = {
 		"name" : set_name,
@@ -163,19 +229,15 @@ def user_signup():
 		"password" : set_password,
 		"public_key" : public_key,
 		"private_key" : private_key,
-		"role" : "doctor"
+		"role" : "doctor",
 	}
+	session["role"] = "doctor"
+	session["name"] = set_name
+	session["public_key"] = public_key
 	file_name = public_key+".txt"
 	with open(file_name,'w') as file:
 		file.write(json.dumps(user_to_file))
 	file.close()
-
-	#verify if the email already exist on the db
-	if collection.find_one({"email":user_to_mongo['email']}):
-		return jsonify({ "error": "Email address already in use" }), 400
-	
-	#send "user" list to database
-	collection.insert_one(user_to_mongo)
 
 	#insert the rbac's createUser transaction here
 	flash("Account successfully created. Return to Login Page.")
@@ -186,7 +248,7 @@ def user_signup():
 def logout():
 	if "public_key" in session:
 		session.pop("public_key")
-	return redirect(url_for('showUserLoginPage'))
+	return redirect(url_for('UserLoginPage'))
 
 #index page
 @app.route('/')
@@ -199,7 +261,7 @@ def showHomePage():
 			welcome = "Hello! " + session["name"]
 			return render_template("admin_index.html", content = welcome)
 	else:
-		return redirect(url_for('showUserLoginPage'))
+		return redirect(url_for('UserLoginPage'))
 
 #route to create
 @app.route("/create-form")
@@ -492,4 +554,3 @@ def showTransferResult():
 
 if __name__== "__main__":
 	app.run(host="0.0.0.0", port="5000", debug=True)
-
