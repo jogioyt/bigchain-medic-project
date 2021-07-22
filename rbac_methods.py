@@ -77,8 +77,8 @@ def createType(adminKeys, namespace, typeName, appId, canLinkAssetId):
     typeTx = create_transaction(adminKeys, asset, metadata)
     return typeTx
 
-#function create type instance that are being used setting an user to become either "proposal" or "vote"
-def createTypeInstance(namespace, keypair, typeName, typeId):
+#the function create type instance is being used to create an instance for the type
+def createTypeInstance(namespace, keypair, typeName, typeId, instanceMetadata):
     ns_asset = namespace+"."+typeName
     date = datetime.now()
     timestamp = date.strftime("%d/%m/%Y %H:%M:%S")
@@ -88,15 +88,5 @@ def createTypeInstance(namespace, keypair, typeName, typeId):
             'link' : typeId
         }
     }
-    if(typeName == "proposal"):
-        metadata = {
-            'name':'new proposal by user: '+keypair["public_key"],
-            'timestamp':timestamp
-        }
-    elif(typeName == "vote"):
-        metadata = {
-            'name':'new vote by user: '+keypair["public_key"],
-            'timestamp':timestamp
-        }
-    tx = create_transaction(keypair, asset, metadata)
+    tx = create_transaction(keypair, asset, instanceMetadata)
     return tx
