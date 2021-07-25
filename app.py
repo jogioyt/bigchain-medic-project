@@ -135,6 +135,8 @@ def admin_signup():
 		"public_key" : public_key,
 		"private_key" : private_key,
 		"role" : "admin",
+		"user_rbac_id": admin_user_rbac_id,
+		"instance_rbac_id": admin_instance_rbac_id
 	}
 	session["role"] = "admin"
 	session["name"] = set_name
@@ -147,6 +149,49 @@ def admin_signup():
 	#insert the rbac's createUser transaction here
 	flash("Account successfully created. Return to Login Page.")
 	return send_file(file_name, as_attachment=True)
+
+"""
+#UNDER CONSTRUCTION
+
+@app.route('/AddPatientPage')
+def AddPatientPage():
+	return #render_template form add patient
+
+@app.route('/add_patient')
+def add_patient():
+	patient_user_rbac = createUser(namespace) #tambahin
+	patient_instance_rbac = createTypeInstance() #tambahin
+	#retrieve patient information from asset created by the doctor
+	#
+	patient_user_rbac_id = patient_user_rbac["id"]
+	patient_instance_rbac_id = patient_instance_rbac["id"]
+	rbac = {
+		"user_rbac_id": patient_user_rbac_id,
+		"instance_rbac_id": patient_instance_rbac_id
+	}
+	#send rbac into bigchaindb
+	return #render_template
+
+@app.route('/AddHospitalPage')
+def AddPatientPage():
+	return #render_template form add hospital
+
+@app.route('/add_hospital')
+def add_hospital():
+	admin_keypair = {}
+	#retrieve hospital information from form or mongo
+	hospital_user_rbac = createUser(namespace, admin_keypair, patient_type_id, 'patient', ) #tambahin
+	hospital_instance_rbac = createTypeInstance() #tambahin
+	hospital_user_rbac_id = hospital_user_rbac["id"]
+	hospital_instance_rbac_id = hospital_instance_rbac["id"]
+	rbac = {
+		"user_rbac_id": hospital_user_rbac_id,
+		"instance_rbac_id": hospital_instance_rbac_id
+	}
+	#send rbac into bigchaindb
+	return #render_template
+
+"""
 
 #Routes for User
 @app.route('/UserLoginPage')
@@ -326,12 +371,13 @@ def showCreateResult():
 					'alamat' : alamat,
 					'gol_darah': gol_darah,
 					'nama_dokter' : session["name"],
-					'id_dokter' : session["id"]
-				}
+					'id_dokter' : session["public_key"]
+				},
+				'link': patient_type_id
 			}
 		}
 		metadata = {
-			#can_link
+			'can_link':[session["public_key"]],
 			'timestamp':timestamp,
 			'patient_meta': {
 				'anamnesis':{
@@ -365,6 +411,8 @@ def showCreateResult():
 			'public_key' : public_key
 		}
 		tx = create_transaction(user_keys,patient_asset, metadata)
+		#add asset as user
+		#add asset and user as instance
 		print(tx)
 		return render_template("create-result.html",content=tx)
 	else:
@@ -379,8 +427,15 @@ def showSearchResult():
 	if request.method == "POST":
 		tx_id = request.form.get("tx_id")
 		tx = retrieve_transaction(tx_id)
-		print(tx)
-		return render_template("search-result.html",content=tx)
+		#verify can_link
+		tx_can_link = tx["metadata"]["can_link"]
+		if session["public_key"] in tx_can_link:
+			print(tx)
+			return render_template("search-result.html",content=tx)
+		else:
+			err_msg = "You do not have the permission to open this medical record."
+			return render_template("search-result.html",content=err_msg)
+		
 	else:
 		return redirect(url_for("showSearchPage"))
 
@@ -394,6 +449,8 @@ def showAppendForm():
 	if request.method == "POST":
 		tx_id = request.form.get("tx_id")
 		tx = retrieve_transaction(tx_id)
+		#verify can_link
+		#if can_link contains session's public key then...
 		if(tx_id == tx['id']):
 			return render_template("append-form.html",content=tx, tx_id = tx_id)
 		else:
@@ -462,7 +519,7 @@ def showAppendResult():
 					'alamat' : alamat,
 					'gol_darah': gol_darah,
 					'nama_dokter' : session["name"],
-					'id_dokter' : session["id"]
+					'id_dokter' : session["public_key"]
 				}
 			}
 		}
@@ -506,7 +563,6 @@ def showAppendResult():
 		return redirect(url_for("showSearchAppendPage"))
 
 #route to burn
-
 @app.route("/search-burn")
 def showSearchBurnPage():
 	return render_template("search-burn.html")
@@ -529,7 +585,6 @@ def showBurn():
 		return redirect(url_for("showSearchBurnPage"))
 
 #route to transfer
-
 @app.route("/search-transfer")
 def showSearchTransferPage():
 	return render_template("search-transfer.html")
