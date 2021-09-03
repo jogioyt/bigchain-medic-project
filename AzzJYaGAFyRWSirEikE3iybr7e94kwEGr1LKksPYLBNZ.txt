@@ -1,1 +1,0 @@
-{"name": "aasa", "email": "aasa@gmail.com", "password": "aasa", "public_key": "AzzJYaGAFyRWSirEikE3iybr7e94kwEGr1LKksPYLBNZ", "private_key": "4X4qSSAXb7sP6iTQ66wNPgRmq9PnTXp1h9eW3b7xJrym", "role": "admin"}
