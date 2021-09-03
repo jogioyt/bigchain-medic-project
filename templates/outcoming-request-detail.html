@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+<div>
+    <h2>{{content["asset"]["data"]["patient"]["nama"]}}</h2>
+    <form action = "incoming_request_result" class="form-floating" method ="POST">
+        <table>
+            <tr>
+                <td>ID Rekam Medis</td>
+                <td>{{}}</td>
+            </tr>
+            <tr>
+                <td>User To</td>
+                <td>{{}}</td>
+            </tr>
+            <tr>
+                <td>User From</td>
+                <td>{{}}</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>{{}}</td>
+            </tr>
+        </table>
+    </form>
+</div>
+{% endblock %}

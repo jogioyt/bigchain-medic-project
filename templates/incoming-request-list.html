@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+<h1>{{content}}</h1>
+<table id="table">
+    <tr>
+        <th>Medical Record ID</th>
+        <th>Owned By</th>
+        <th>Requested By</th>
+        <th></th>
+    </tr>
+    {% for row in data %}
+    <form action = "incoming-request-detail" class="form-floating" method ="POST">
+        <tr>
+            <td><input type="hidden" name="tx_id" value={{row[0]}}>{{row[0]}}</td>
+            <td><input type="hidden" name="owner" value={{row[1]}}>{{row[1]}}</td>
+            <td><input type="hidden" name="requester" value={{row[2]}}>{{row[2]}}</td>
+            <td><input type="submit" class="btn btn-primary btn-lg" value="Review"></td>
+        </tr>
+    </form>
+    {% endfor %}
+</table>
+{% endblock %}
+<script>
+
+</script>

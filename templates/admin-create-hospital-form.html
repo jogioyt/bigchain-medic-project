@@ -1,0 +1,43 @@
+{% extends "admin_base.html" %}
+{% block title %}{% endblock %}
+{% block content %}
+<form action = "add_hospital" class="form-floating" method ="POST">
+    <!--Identitas Pasien untuk Asset-->
+    <h2>Identitas Rumah Sakit</h2>
+    <p>
+        <label>Masukkan Nama Rumah Sakit</label>
+        <input type="text" class="form-control" name="rs_nama" id="rs_nama" required>
+    </p>
+    <p>
+        <label>Masukkan Alamat Rumah Sakit</label>
+        <input type="text" class="form-control" name="rs_alamat_jalan" id="rs_alamat_jalan" required>
+    </p>
+    <p>
+        <label>Masukkan Kota/Kabupaten Alamat Rumah Sakit</label>
+        <input type="text" class="form-control" name="rs_alamat_kota" id="rs_alamat_kota" required>
+    </p>
+    <p>
+        <label>Masukkan Provinsi Alamat Rumah Sakit</label>
+        <input type="text" class="form-control" name="rs_alamat_provinsi" id="rs_alamat_provinsi" required>
+    </p>
+    <p>
+        <label>Masukkan Address Tendermint</label>
+        <input type="text" class="form-control" name="tendermint_address" id="tendermint_address" required>
+    </p>
+    <p>
+        <label>Masukkan Public Key Tendermint</label>
+        <input type="text" class="form-control" name="tendermint_public_key" id="tendermint_public_key" required>
+    </p>
+    <p>
+        <label>Masukkan ID Node Tendermint</label>
+        <input type="text" class="form-control" name="tendermint_node_id" id="tendermint_node_id" required>
+    </p>
+    <!--Submit-->
+    <h2>Konfirmasi Pengiriman Data</h2>
+    <div>
+        <label>Masukkan kode transaksi</label>
+        <input type="password" name="private_key">
+    </div> 
+    <input type="submit" class="btn btn-primary btn-lg" value="Kirim">
+</form>
+{% endblock %}

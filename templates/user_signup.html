@@ -8,17 +8,27 @@
       <h1 class="center">Create an Account</h1>
 
       <form name="signup_form" action="user_signup" method="POST">
+        <p>
+          <label for="name">Name</label>
+          <input type="text" name="name" class="form-control" required>
+        </p>
+        
+        <p>
+          <label for="email">Email</label>
+          <input type="email" name="email" class="form-control" required>
+        </p>
+        
+        <p>
+          <label for="password">Password</label>
+          <input type="password" name="password" class="form-control" required>
+        </p>
 
-        <label for="name">Name</label>
-        <input type="text" name="name" class="field" required>
-
-        <label for="email">Email</label>
-        <input type="email" name="email" class="field" required>
-
-        <label for="password">Password</label>
-        <input type="password" name="password" class="field" required>
-
-        <input type="submit" value="Sign Up" class="btn">
+        <p>
+          <label for="name">Hospital</label>
+          <input type="text" name="hospital" class="form-control" required>
+        </p>
+        
+         <input type="submit" value="Sign Up" class="btn">
       </form>
     </div>
   </div>
