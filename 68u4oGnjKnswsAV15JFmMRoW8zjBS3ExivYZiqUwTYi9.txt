@@ -1,1 +1,0 @@
-{"name": "gogo", "email": "gogo@gmail.com", "password": "gogo", "public_key": "68u4oGnjKnswsAV15JFmMRoW8zjBS3ExivYZiqUwTYi9", "private_key": "7ySxVsTYu977QU9V7CLxNGgoZNYJxEeo5Xz6G29T6Hk7", "role": "doctor"}
