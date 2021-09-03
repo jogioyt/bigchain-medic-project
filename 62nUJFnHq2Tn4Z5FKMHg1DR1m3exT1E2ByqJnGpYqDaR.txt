@@ -1,7 +1,0 @@
-{
-    "name": "ubuns",
-    "email": "ubuns@ubuntu.com", 
-    "password": "ubuns", 
-    "public_key": "62nUJFnHq2Tn4Z5FKMHg1DR1m3exT1E2ByqJnGpYqDaR", 
-    "private_key": "J65ggPYi2u1Da4U3gDmXLiAsABGp6jUmW14tgucKFkcZ"
-}
