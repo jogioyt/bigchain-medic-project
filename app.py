@@ -300,8 +300,8 @@ def user_signup():
 		doctor_instance_rbac_id = doctor_instance_rbac["id"]
 
 		rbac = {
-			"user_rbac_id": doctor_user_rbac_id,
-			"instance_rbac_id": doctor_instance_rbac_id
+			"user_rbac_id": str(doctor_user_rbac_id),
+			"instance_rbac_id": str(doctor_instance_rbac_id)
 		}
 
 		#add the rbac to mongo dict
@@ -317,6 +317,8 @@ def user_signup():
 		
 		#send file
 		user_to_file = {
+			"user_rbac_id": str(doctor_user_rbac_id),
+			"instance_rbac_id": str(doctor_instance_rbac_id),
 			"name" : set_name,
 			"email" : set_email,
 			"password" : set_password,
@@ -325,8 +327,6 @@ def user_signup():
 			"role" : "doctor",
 			"hospital" : set_hospital
 		}
-		user_to_mongo.update(rbac)
-		user_to_file = user_to_mongo
 		file_name = public_key+".txt"
 		with open(file_name,'w') as file:
 			file.write(json.dumps(user_to_file))
@@ -337,7 +337,7 @@ def user_signup():
 		return send_file(file_name, as_attachment=True)
 	else:
 		err_msg = "Signup failed. The Hospital you input does not exist in the database."
-		return render_template("error-landing-page.html",content=err_msg)
+		return render_template("error-signed-out.html",content=err_msg)
  
 #logout
 @app.route('/logout')
