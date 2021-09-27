@@ -10,20 +10,15 @@ from datetime import datetime
 #Homemade Modules
 from bdb_transaction import *
 from rbac_methods import *
-from getAssets import *
+from rbac_setup import *
 
 
 app = Flask(__name__)
 app.secret_key = b'\xcc^\x91\xea\x17-\xd0W\x03\xa7\xf8J0\xac8\xc5' 
 
-#initiate bigchaindb
-bdb_root_url = 'http://localhost:9984/'
-bdb = BigchainDB(bdb_root_url)
-
 #rbac stuff
 #initiate namespace
 namespace = "medical-app"
-
 #admin type
 admin_type = getAdminType()
 admin_type_id = admin_type["id"]
