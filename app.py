@@ -5,6 +5,7 @@ from bigchaindb_driver.crypto import generate_keypair
 from flask.helpers import flash, send_file
 import pymongo
 import json
+import os
 from datetime import datetime
 
 #Homemade Modules
@@ -82,7 +83,7 @@ def admin_signup():
 	set_password = request.form.get("password")
 	
 	#verify if the email already exist on the db
-	if db["doctor_accounts"].find_one({"email":set_email}):
+	if db["admin_accounts"].find_one({"email":set_email}):
 		return jsonify({ "error": "Email address already in use" }), 400
 
 	#generate keypair
@@ -105,14 +106,11 @@ def admin_signup():
 
 	#apply rbac createUser and createTypeInstance
 	admin_user_rbac = createUser(namespace, bob_keypairs, admin_type_id, 'admin', public_key, user_to_mongo)
-	admin_instance_rbac = createTypeInstance(namespace, bob_keypairs, 'admin', admin_type_id, user_to_mongo)
 
 	admin_user_rbac_id = admin_user_rbac["id"]
-	admin_instance_rbac_id = admin_instance_rbac["id"]
 
 	rbac = {
-		"user_rbac_id": admin_user_rbac_id,
-		"instance_rbac_id": admin_instance_rbac_id
+		"user_rbac_id": admin_user_rbac_id
 	}
 
 	#add the rbac to mongo dict
@@ -129,6 +127,7 @@ def admin_signup():
 		"public_key" : public_key,
 		"private_key" : private_key,
 		"role" : "admin",
+		"user_rbac_id": admin_user_rbac_id
 	}
 
 	#set session
@@ -137,14 +136,15 @@ def admin_signup():
 	session["public_key"] = public_key
 	
 	#send file
-	file_name = public_key+".txt"
-	with open(file_name,'w') as file:
+	file_name = set_name+"_admin_"+public_key+".txt"
+	completedFilename = os.path.join(os.path.expanduser('~'),"medical-app/application/admin_account",file_name)
+	with open(completedFilename,'w') as file:
 		file.write(json.dumps(user_to_file))
 	file.close()
 
 	#insert the rbac's createUser transaction here
 	flash("Account successfully created. Return to Login Page.")
-	return send_file(file_name, as_attachment=True)
+	return send_file(completedFilename, as_attachment=True)
 
 #UNDER CONSTRUCTION
 
@@ -188,15 +188,11 @@ def add_hospital():
 	}
 
 	#apply rbac createUser and createTypeInstance
-	hospital_user_rbac = createUser(namespace, rs_keypairs, hospital_type_id, 'hospital', public_key, user_to_mongo)
 	hospital_instance_rbac = createTypeInstance(namespace, rs_keypairs, 'hospital', hospital_type_id, user_to_mongo)
-
-	hospital_user_rbac_id = hospital_user_rbac["id"]
 	hospital_instance_rbac_id = hospital_instance_rbac["id"]
 
 	rbac = {
-		"user_rbac_id": hospital_user_rbac_id,
-		"instance_rbac_id": hospital_instance_rbac_id,
+		"instance_rbac_id": hospital_instance_rbac_id
 	}
 
 	#add the rbac to mongo dict
@@ -212,10 +208,17 @@ def add_hospital():
 		"public_key" : public_key,
 		"private_key": private_key,
 		"role" : "hospital",
+		"tendermint":{
+			"t_address":set_tendermint_address,
+			"t_pub_key":set_tendermint_pub_key,
+			"t_node_id":set_tendermint_node_id
+		},
+		"instance_rbac_id": hospital_instance_rbac_id
 	}
 	user_to_file.update(rbac)
-	file_name = public_key+".txt"
-	with open(file_name,'w') as file:
+	file_name = set_name+"_hospital_"+public_key+".txt"
+	completedFilename = os.path.join(os.path.expanduser('~'),"medical-app/application/hospital",file_name)
+	with open(completedFilename,'w') as file:
 		file.write(json.dumps(user_to_file))
 	file.close()
 
@@ -289,14 +292,10 @@ def user_signup():
 
 		#apply rbac createUser and createTypeInstance
 		doctor_user_rbac = createUser(namespace, bob_keypairs, admin_type_id, 'doctor', public_key, user_to_mongo)
-		doctor_instance_rbac = createTypeInstance(namespace, bob_keypairs, 'doctor', doctor_type_id, user_to_mongo)
-
 		doctor_user_rbac_id = doctor_user_rbac["id"]
-		doctor_instance_rbac_id = doctor_instance_rbac["id"]
 
 		rbac = {
-			"user_rbac_id": str(doctor_user_rbac_id),
-			"instance_rbac_id": str(doctor_instance_rbac_id)
+			"user_rbac_id": str(doctor_user_rbac_id)
 		}
 
 		#add the rbac to mongo dict
@@ -313,7 +312,6 @@ def user_signup():
 		#send file
 		user_to_file = {
 			"user_rbac_id": str(doctor_user_rbac_id),
-			"instance_rbac_id": str(doctor_instance_rbac_id),
 			"name" : set_name,
 			"email" : set_email,
 			"password" : set_password,
@@ -322,14 +320,15 @@ def user_signup():
 			"role" : "doctor",
 			"hospital" : set_hospital
 		}
-		file_name = public_key+".txt"
-		with open(file_name,'w') as file:
+		file_name = set_name+"_doctor_"+public_key+".txt"
+		completedFilename = os.path.join(os.path.expanduser('~'),"medical-app/application/hospital",file_name)
+		with open(completedFilename,'w') as file:
 			file.write(json.dumps(user_to_file))
 		file.close()
 
 		#insert the rbac's createUser transaction here
 		flash("Account successfully created. Return to Login Page.")
-		return send_file(file_name, as_attachment=True)
+		return send_file(completedFilename, as_attachment=True)
 	else:
 		err_msg = "Signup failed. The Hospital you input does not exist in the database."
 		return render_template("error-signed-out.html",content=err_msg)

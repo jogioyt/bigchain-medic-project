@@ -5,7 +5,7 @@ from bigchaindb_driver.crypto import generate_keypair
 from rbac_methods import *
 from datetime import datetime, time
 import json
-
+import os
 """
 inititate users for this role based shenanigans
 1. creator = the user that would then create id for the app
@@ -15,41 +15,36 @@ def getAdminType():
     filename = "admin-type.txt"
     with open(filename) as json_file:
         data = json.load(json_file)
-        assetId = data["id"]
     json_file.close()
-    return assetId
+    return data
 
 def getApp():
     filename = "app.txt"
     with open(filename) as json_file:
         data = json.load(json_file)
-        assetId = data["id"]
     json_file.close()
-    return assetId
+    return data
 
 def getHospitalType():
     filename = "hospital-type.txt"
     with open(filename) as json_file:
         data = json.load(json_file)
-        assetId = data["id"]
     json_file.close()
-    return assetId
+    return data
 
 def getDoctorType():
     filename = "doctor-type.txt"
     with open(filename) as json_file:
         data = json.load(json_file)
-        assetId = data["id"]
     json_file.close()
-    return assetId
+    return data
 
 def getPatientType():
     filename = "patient-type.txt"
     with open(filename) as json_file:
         data = json.load(json_file)
-        assetId = data["id"]
     json_file.close()
-    return assetId
+    return data
 
 def main():
     date = datetime.now()
@@ -148,7 +143,7 @@ def main():
     print("Patient type Id: "+patient_type_id)
     print("=============================")
 
-    file_name5 = "doctor-type.txt"
+    file_name5 = "patient-type.txt"
     with open(file_name5,'w') as file5:
         file5.write(json.dumps(app_tx))
     file5.close()
