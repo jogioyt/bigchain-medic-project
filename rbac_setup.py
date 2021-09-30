@@ -18,6 +18,13 @@ def getAdminType():
     json_file.close()
     return data
 
+def getAdminUser():
+    filename = "admin-user.txt"
+    with open(filename) as json_file:
+        data = json.load(json_file)
+    json_file.close()
+    return data
+
 def getApp():
     filename = "app.txt"
     with open(filename) as json_file:
@@ -90,6 +97,13 @@ def main():
     print("=============================")
     print("Admin User Id: "+adminUserId)
     print("=============================")
+
+    adminUserDetails = adminUser.update(admin_keys)
+
+    file_name = "admin-user.txt"
+    with open(file_name,'w') as file:
+        file.write(json.dumps(adminUserDetails))
+    file.close()
 
     #create app representative by using createApp
     app_tx = createApp(namespace, admin_keys, adminGroupId)

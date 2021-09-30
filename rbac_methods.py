@@ -73,7 +73,7 @@ def createType(adminKeys, namespace, typeName, appId, canLinkAssetId):
     typeTx = create_transaction(adminKeys, asset, metadata)
     return typeTx
 
-#function create type instance that are being used setting an user to become either "proposal" or "vote"
+#function create type instance
 def createTypeInstance(namespace, keypair, typeName, typeId, instanceMetadata):
     ns_asset = namespace+"."+typeName
     asset = {

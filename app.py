@@ -164,12 +164,12 @@ def add_hospital():
 	set_tendermint_node_id = request.form.get("tendermint_node_id")
 
 	#generate keypair
-	rs = generate_keypair()
-	public_key = rs.public_key
-	private_key = rs.private_key
-	rs_keypairs = {
-		'public_key': public_key,
-		'private_key': private_key
+	private_key = request.form.get("private_key")
+	public_key = session['public_key']
+
+	admin_keys = {
+		'private_key':private_key,
+		'public_key':public_key
 	}
 	
 	set_address = str(set_address_street)+", "+str(set_address_city)+", "+str(set_address_province)
@@ -178,7 +178,6 @@ def add_hospital():
 	user_to_mongo = {
 		"name" : set_name,
 		"address" : set_address,
-		"public_key" : public_key,
 		"role" : "hospital",
 		"tendermint":{
 			"t_address":set_tendermint_address,
@@ -188,7 +187,7 @@ def add_hospital():
 	}
 
 	#apply rbac createUser and createTypeInstance
-	hospital_instance_rbac = createTypeInstance(namespace, rs_keypairs, 'hospital', hospital_type_id, user_to_mongo)
+	hospital_instance_rbac = createTypeInstance(namespace, admin_keys, 'hospital', hospital_type_id, user_to_mongo)
 	hospital_instance_rbac_id = hospital_instance_rbac["id"]
 
 	rbac = {
@@ -201,30 +200,7 @@ def add_hospital():
 	#send "user" list to database
 	db["hospital_accounts"].insert_one(user_to_mongo)
 	
-	#add to file
-	user_to_file = {
-		"name" : set_name,
-		"address" : set_address,
-		"public_key" : public_key,
-		"private_key": private_key,
-		"role" : "hospital",
-		"tendermint":{
-			"t_address":set_tendermint_address,
-			"t_pub_key":set_tendermint_pub_key,
-			"t_node_id":set_tendermint_node_id
-		},
-		"instance_rbac_id": hospital_instance_rbac_id
-	}
-	user_to_file.update(rbac)
-	file_name = set_name+"_hospital_"+public_key+".txt"
-	completedFilename = os.path.join(os.path.expanduser('~'),"medical-app/application/hospital",file_name)
-	with open(completedFilename,'w') as file:
-		file.write(json.dumps(user_to_file))
-	file.close()
-
-	#insert the rbac's createUser transaction here
-	flash("Account successfully created. Return to Login Page.")
-	return send_file(file_name, as_attachment=True)
+	return render_template("admin-create-hospital-result.html", content = hospital_instance_rbac)
 
 #Routes for User
 @app.route('/UserLoginPage')
@@ -403,6 +379,8 @@ def showCreateResult():
 		public_key = session['public_key']
 
 		#input asset dan metadata ke chain
+		ns_asset = nama+"_pasien_"+nik_id
+
 		patient_asset = {
 			'data' : {
 				#rbac_shenanigans
@@ -416,6 +394,7 @@ def showCreateResult():
 					'nama_dokter' : session["name"],
 					'id_dokter' : session["public_key"]
 				},
+				'ns': ns_asset,
 				'link': patient_type_id
 			}
 		}
