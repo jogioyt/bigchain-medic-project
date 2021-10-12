@@ -7,10 +7,8 @@ from bdb_transaction import create_transaction, transfer_transaction
 def createGroup(namespace, admin_keys):
     ns = namespace+'.admin'
     adminGroupAsset = {
-        'data':{
-            'ns':ns,
-            'name': 'admin'
-        }
+        'ns':ns,
+        'name': 'admin'
     }
     adminGroupMetadata = {
         'can_link' : admin_keys['public_key']
@@ -20,10 +18,8 @@ def createGroup(namespace, admin_keys):
 
 def createApp(namespace, admin_keys, adminGroupId):
     appAsset = {
-        'data': {
-            'ns' : namespace,
-            'name' : namespace
-        }
+        'ns' : namespace,
+        'name' : namespace
     }
     appMetadata = {
         'can_link' : adminGroupId
@@ -35,13 +31,11 @@ def createApp(namespace, admin_keys, adminGroupId):
 def createUser(namespace, adminKeyPair, userTypeId, userTypeName, userPublicKey, userMetadata):
     ns_asset = namespace+"."+userTypeName 
     asset = {
-        'data':{
-            'ns': ns_asset,
-            'link' : userTypeId,
-            'createdBy': adminKeyPair["public_key"],
-            'type' : userTypeName,
-            'keyword':'UserAsset'          
-        }
+        'ns': ns_asset,
+        'link' : userTypeId,
+        'createdBy': adminKeyPair["public_key"],
+        'type' : userTypeName,
+        'keyword':'UserAsset'          
     }
     date = datetime.now()
     timestamp = date.strftime("%d/%m/%Y %H:%M:%S")
@@ -61,11 +55,9 @@ def createUser(namespace, adminKeyPair, userTypeId, userTypeName, userPublicKey,
 def createType(adminKeys, namespace, typeName, appId, canLinkAssetId):
     ns_asset = namespace+"."+typeName
     asset = {
-        'data':{
-            'ns': ns_asset,
-            'link': appId,
-            'name': typeName
-        }
+        'ns': ns_asset,
+        'link': appId,
+        'name': typeName
     }
     metadata = {
         'can_link': canLinkAssetId
@@ -77,10 +69,8 @@ def createType(adminKeys, namespace, typeName, appId, canLinkAssetId):
 def createTypeInstance(namespace, keypair, typeName, typeId, instanceMetadata):
     ns_asset = namespace+"."+typeName
     asset = {
-        'data':{
-            'ns' : ns_asset,
-            'link' : typeId
-        }
+        'ns' : ns_asset,
+        'link' : typeId
     }
     tx = create_transaction(keypair, asset, instanceMetadata)
     return tx

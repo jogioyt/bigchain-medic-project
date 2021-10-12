@@ -47,7 +47,7 @@ def getDoctorType():
     return data
 
 def getPatientType():
-    filename = "patient-type.txt"
+    filename = "medical-record-type.txt"
     with open(filename) as json_file:
         data = json.load(json_file)
     json_file.close()
@@ -149,15 +149,15 @@ def main():
     file4.close()
 
     #tribe 4 correspons to tribe 3
-    patient_type = createType(admin_keys, namespace, 'patient', appId, doctor_type_id)
-    print("Patient type details:")
-    print(patient_type)
+    med_rec_type = createType(admin_keys, namespace, 'med_rec', appId, doctor_type_id)
+    print("Medical Record type details:")
+    print(med_rec_type)
     print("=============================")
-    patient_type_id = patient_type["id"]
-    print("Patient type Id: "+patient_type_id)
+    med_rec_type_id = med_rec_type["id"]
+    print("Medical Record type Id: "+med_rec_type_id)
     print("=============================")
 
-    file_name5 = "patient-type.txt"
+    file_name5 = "medical-record-type.txt"
     with open(file_name5,'w') as file5:
         file5.write(json.dumps(app_tx))
     file5.close()

@@ -113,6 +113,8 @@ def admin_signup():
 		"user_rbac_id": admin_user_rbac_id
 	}
 
+	print(admin_user_rbac)
+
 	#add the rbac to mongo dict
 	user_to_mongo.update(rbac)
 	
@@ -194,6 +196,8 @@ def add_hospital():
 		"instance_rbac_id": hospital_instance_rbac_id
 	}
 
+	print(hospital_instance_rbac)
+
 	#add the rbac to mongo dict
 	user_to_mongo.update(rbac)
 	
@@ -269,7 +273,7 @@ def user_signup():
 		#apply rbac createUser and createTypeInstance
 		doctor_user_rbac = createUser(namespace, bob_keypairs, admin_type_id, 'doctor', public_key, user_to_mongo)
 		doctor_user_rbac_id = doctor_user_rbac["id"]
-
+		print(doctor_user_rbac)
 		rbac = {
 			"user_rbac_id": str(doctor_user_rbac_id)
 		}
@@ -297,7 +301,7 @@ def user_signup():
 			"hospital" : set_hospital
 		}
 		file_name = set_name+"_doctor_"+public_key+".txt"
-		completedFilename = os.path.join(os.path.expanduser('~'),"medical-app/application/hospital",file_name)
+		completedFilename = os.path.join(os.path.expanduser('~'),"medical-app/application/doctor_account",file_name)
 		with open(completedFilename,'w') as file:
 			file.write(json.dumps(user_to_file))
 		file.close()
@@ -382,21 +386,19 @@ def showCreateResult():
 		ns_asset = nama+"_pasien_"+nik_id
 
 		patient_asset = {
-			'data' : {
-				#rbac_shenanigans
-				'patient' : {
-					'nik_id' : nik_id,
-					'nama' : nama,
-					'ttl' : ttl,
-					'jenis_kelamin' : sex,
-					'alamat' : alamat,
-					'gol_darah': gol_darah,
-					'nama_dokter' : session["name"],
-					'id_dokter' : session["public_key"]
-				},
-				'ns': ns_asset,
-				'link': patient_type_id
-			}
+			#rbac_shenanigans
+			'patient' : {
+				'nik_id' : nik_id,
+				'nama' : nama,
+				'ttl' : ttl,
+				'jenis_kelamin' : sex,
+				'alamat' : alamat,
+				'gol_darah': gol_darah,
+				'nama_dokter' : session["name"],
+				'id_dokter' : session["public_key"]
+			},
+			'ns': ns_asset,
+			'link': patient_type_id
 		}
 		metadata = {
 			'can_link':[session["public_key"]],
@@ -654,22 +656,20 @@ def showAppendResult():
 
 		#input asset dan metadata ke chain
 		patient_asset = {
-			'data' : {
-				#rbac_shenanigans
-				'patient' : {
-					'nik_id' : nik_id,
-					'nama' : nama,
-					'ttl' : ttl,
-					'jenis_kelamin' : sex,
-					'alamat' : alamat,
-					'gol_darah': gol_darah,
-					'nama_dokter' : session["name"],
-					'id_dokter' : session["public_key"]
-				}
+			#rbac_shenanigans
+			'patient' : {
+				'nik_id' : nik_id,
+				'nama' : nama,
+				'ttl' : ttl,
+				'jenis_kelamin' : sex,
+				'alamat' : alamat,
+				'gol_darah': gol_darah,
+				'nama_dokter' : session["name"],
+				'id_dokter' : session["public_key"]
 			}
 		}
 		metadata = {
-			#can_link
+			'can_link':[session["public_key"]],
 			'timestamp':timestamp,
 			'patient_meta': {
 				'anamnesis':{
