@@ -1,0 +1,1 @@
+{"user_rbac_id": "03d991581f9ddea3cd908a38f6bc955b1130610326bd4f7f77a99cd3c9e6dde8", "name": "Charlie", "email": "charlie@rs3.com", "password": "charlie", "public_key": "2iZyunfcSVvzBwUsCUiESdLtr5wGPnsL3VWczWB9YDAC", "private_key": "Hd8onZ8mC5FyjxiG3p32WEJLqU5BUvxGE6ukKbN53VXj", "role": "doctor", "hospital": "RS Node Ketiga"}

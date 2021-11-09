@@ -1,0 +1,1 @@
+{"user_rbac_id": "da04202940f308e566b017dc79eebb4bf1a7acaa4225fbbb6e936ef4b7cd44c8", "name": "Donna", "email": "donna@rs4.com", "password": "donna", "public_key": "C6TvnCs5aS6dJgTk6UTf3GvSdHtBG2PN4DLeW6Wc8ftP", "private_key": "DzFJbAEciZa7Cx6uGnLjN1WTRSwhDoYAqVxQxgQhvWpA", "role": "doctor", "hospital": "RS Node Keempat"}

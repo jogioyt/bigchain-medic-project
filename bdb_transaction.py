@@ -1,6 +1,6 @@
 from bigchaindb_driver import BigchainDB
 
-bdb_root_url = 'http://34.101.134.220:9984/'
+bdb_root_url = 'http://34.101.222.72:9984/'
 bdb = BigchainDB(bdb_root_url)
 
 def create_transaction(user_keys,data_asset,meta):

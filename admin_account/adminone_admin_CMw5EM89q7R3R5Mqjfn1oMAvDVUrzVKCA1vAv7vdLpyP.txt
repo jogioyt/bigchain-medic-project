@@ -1,0 +1,1 @@
+{"name": "adminone", "email": "admin@one.com", "password": "adminone", "public_key": "CMw5EM89q7R3R5Mqjfn1oMAvDVUrzVKCA1vAv7vdLpyP", "private_key": "Bnu4s8WTDLnpY2HZmAzxey8iA7gBhpQTgJPZqtZAMkM5", "role": "admin", "user_rbac_id": "8e23fef85bf8e54deee8e4c257a8ddad0d73f838c089d40a9635f0f8e095369e"}

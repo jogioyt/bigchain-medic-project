@@ -152,7 +152,7 @@ def admin_signup():
 
 @app.route('/AddHospitalPage')
 def AddHospitalPage():
-	return render_template("admin-create-hospital-form.html")
+	return render_template("admin-create-hospital-form.html", key = session["public_key"])
 
 @app.route('/add_hospital', methods = ["POST"])
 def add_hospital():
@@ -167,7 +167,7 @@ def add_hospital():
 
 	#generate keypair
 	private_key = request.form.get("private_key")
-	public_key = session['public_key']
+	public_key = request.form.get("public_key")
 
 	admin_keys = {
 		'private_key':private_key,
@@ -334,7 +334,7 @@ def showHomePage():
 #route to create
 @app.route("/create-form")
 def showCreatePage():
-	return render_template("create-form.html")
+	return render_template("create-form.html",content = session["public_key"], content1 = session["name"])
 
 @app.route("/create-result", methods = ["POST","GET"])
 def showCreateResult():
@@ -380,7 +380,8 @@ def showCreateResult():
 
 		#keypair
 		private_key = request.form.get("private_key")
-		public_key = session['public_key']
+		public_key = request.form.get("public_key")
+		doctor_name = request.form.get("doctor_name")
 
 		#input asset dan metadata ke chain
 		ns_asset = nama+"_pasien_"+nik_id
@@ -394,14 +395,14 @@ def showCreateResult():
 				'jenis_kelamin' : sex,
 				'alamat' : alamat,
 				'gol_darah': gol_darah,
-				'nama_dokter' : session["name"],
-				'id_dokter' : session["public_key"]
+				'nama_dokter' : doctor_name,
+				'id_dokter' : public_key
 			},
 			'ns': ns_asset,
 			'link': patient_type_id
 		}
 		metadata = {
-			'can_link':[session["public_key"]],
+			'can_link':[public_key],
 			'timestamp':timestamp,
 			'patient_meta': {
 				'anamnesis':{
@@ -599,7 +600,7 @@ def showAppendForm():
 		#verify can_link, if can_link contains session's public key then...
 		tx_can_link = tx["metadata"]["can_link"]
 		if session["public_key"] in tx_can_link:
-			return render_template("append-form.html",content=tx, tx_id = tx_id)
+			return render_template("append-form.html",content=tx, tx_id = tx_id, key = session["public_key"], doc_name = session["name"])
 		else:
 			err_msg = "You do not have the permission to open this medical record."
 			return render_template("error-landing-page.html",content=err_msg)
@@ -652,7 +653,8 @@ def showAppendResult():
 
 		#keypair
 		private_key = request.form.get("private_key")
-		public_key = session['public_key']
+		public_key = request.form.get("public_key")
+		doctor_name = request.form.get("doctor_name")
 
 		#input asset dan metadata ke chain
 		patient_asset = {
@@ -664,8 +666,8 @@ def showAppendResult():
 				'jenis_kelamin' : sex,
 				'alamat' : alamat,
 				'gol_darah': gol_darah,
-				'nama_dokter' : session["name"],
-				'id_dokter' : session["public_key"]
+				'nama_dokter' : doctor_name,
+				'id_dokter' : public_key
 			}
 		}
 		metadata = {
@@ -741,7 +743,7 @@ def showTransferResult():
 		tx = retrieve_transaction(tx_id)
 		address_id = request.form.get("address_id")
 		private_key = request.form.get("private_key")
-		public_key = session["public_key"]
+		public_key = request.form.get("public_key")
 		user_keys = {
 			"public_key":public_key,
 			"private_key":private_key

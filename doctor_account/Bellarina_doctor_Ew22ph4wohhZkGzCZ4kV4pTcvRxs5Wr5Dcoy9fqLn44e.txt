@@ -1,0 +1,1 @@
+{"user_rbac_id": "b73e087431238472a385070a47066ff7d33946e5040ed7317be70e8fe30cacbb", "name": "Bellarina", "email": "bella@rs2.com", "password": "bella", "public_key": "Ew22ph4wohhZkGzCZ4kV4pTcvRxs5Wr5Dcoy9fqLn44e", "private_key": "pr1iQuo1BgMiDEgfQCMVebQg84A7GDDYooniorSBWG3", "role": "doctor", "hospital": "RS Node Kedua"}

@@ -1,0 +1,1 @@
+{"user_rbac_id": "b10efe66686f6e5950067d428a5ec67ebece3f11bebd125636652a255eb29cef", "name": "Augustine", "email": "aug@rs1.com", "password": "aug", "public_key": "DtjaxtWXinjT1bEtU1Q876RRVAUMX36uAbysnGscP4na", "private_key": "J81VnoD2NBn7NaWkkDzYVPCWFyuCJxr3FhA4PiMHsD5J", "role": "doctor", "hospital": "RS Bersama Node Pertama"}
