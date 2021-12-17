@@ -4,6 +4,7 @@
 <h1>{{content}}</h1>
 <table id="table">
     <tr>
+        <th>Ticket ID</th>
         <th>Medical Record ID</th>
         <th>Owned By</th>
         <th>Requested By</th>
@@ -12,10 +13,11 @@
     {% for row in data %}
     <form action = "outcoming-request-detail" class="form-floating" method ="POST">
         <tr>
-            <td><input type="hidden" name="tx_id" value={{row[0]}}>{{row[0]}}</td>
-            <td><input type="hidden" name="owner" value={{row[1]}}>{{row[1]}}</td>
-            <td><input type="hidden" name="requester" value={{row[2]}}>{{row[2]}}</td>
-            <td><input type="submit" class="btn btn-primary btn-lg" value="Check"></td>
+            <td><input type="hidden" name="ticket_id" value={{row[0]}}>{{row[0]}}</td>
+            <td><input type="hidden" name="tx_id" value={{row[1]}}>{{row[1]}}</td>
+            <td><input type="hidden" name="owner" value={{row[2]}}>{{row[2]}}</td>
+            <td><input type="hidden" name="requester" value={{row[3]}}>{{row[3]}}</td>
+            <td><input type="hidden" name="status" value={{row[4]}}>{{row[4]}}</td>
         </tr>
     </form>
     {% endfor %}

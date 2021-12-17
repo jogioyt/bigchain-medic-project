@@ -11,8 +11,8 @@ from datetime import datetime
 #Homemade Modules
 from bdb_transaction import *
 from rbac_methods import *
-from rbac_setup import *
-
+from setup import *
+from decentralization_test import createTest
 
 app = Flask(__name__)
 app.secret_key = b'\xcc^\x91\xea\x17-\xd0W\x03\xa7\xf8J0\xac8\xc5' 
@@ -336,14 +336,15 @@ def showHomePage():
 def showCreatePage():
 	return render_template("create-form.html",content = session["public_key"], content1 = session["name"])
 
-@app.route("/create-result", methods = ["POST","GET"])
+@app.route("/create-result", methods = ["POST"])
 def showCreateResult():
 	if request.method == "POST":
 		#Data untuk asset
-		nik_id = request.form.get("nik_id")
-		nama = request.form.get("nama")
-		birthplace = request.form.get("birthplace")
-		birthday = request.form.get("birthday")
+		nik_id = str(request.form.get("nik_id"))
+		print(nik_id)
+		nama = str(request.form.get("nama"))
+		birthplace = str(request.form.get("birthplace"))
+		birthday = str(request.form.get("birthday"))
 		ttl= birthplace + ", " + birthday
 		alamat = request.form.get("alamat")
 		sex = request.form.get("sex") #jenis kelamin
@@ -446,17 +447,25 @@ def showCreateResult():
 #route to search
 @app.route("/search-form")
 def showSearchPage():
-	return render_template("search-form.html")
+	pubkey = session["public_key"]
+	return render_template("search-form.html", key = pubkey)
 
 @app.route("/search-result", methods = ["POST","GET"])
 def showSearchResult():
 	if request.method == "POST":
 		tx_id = request.form.get("tx_id")
+		public_key = request.form.get("public_key")
 		tx = retrieve_transaction(tx_id)
 		#verify can_link
 		tx_can_link = tx["metadata"]["can_link"]
-		if session["public_key"] in tx_can_link:
-			print(tx)
+		if public_key in tx_can_link:
+			if tx["operation"]=='TRANSFER':	
+				get_prev_tx_id = tx['asset']['id']
+				get_prev_tx = retrieve_transaction(get_prev_tx_id)
+				tx['asset'] = get_prev_tx['asset']
+				print(tx)
+			else:
+				print(tx)
 			return render_template("search-result-success.html",content=tx)
 		else:
 			err_msg = "You do not have the permission to open this medical record."
@@ -533,28 +542,34 @@ def incoming_request_result():
 		'public_key':public_key,
 		'private_key':private_key
 	}
-	
-	#bigchaindb processor
+
 	tx = retrieve_transaction(str(tx_id))
 	tx_asset = tx['asset']
 	tx_metadata = tx['metadata']
+	print("================================")
 	print(tx)
 	tx_link = {
 		'can_link':[user["public_key"], requester]
     }
 	tx_metadata.update(tx_link)
+	print("================================")
 	print(tx_metadata)
-	tx = append_transaction(tx_id, tx_asset, tx_metadata, user)
+	
+	#bigchaindb processor
+	updatedtx = append_transaction(tx_id, tx_asset, tx_metadata, user)
+	print(updatedtx)
 
 	#mongodb processor
-	query = db["med_rec_requests"].find({"tx_id":tx_id,"user_to":session["public_key"],"user_from":requester})
-	status = "accepted. open the medical record on "+tx["id"]
+	query = db["med_rec_requests"].find_one({'tx_id':tx_id},{'user_from':requester})
+	print(query)
+	status = "accepted. open the medical record on "+updatedtx["id"]
 	data_update = {
 		"$set": { 
 			"status": status
 		} 
 	}
 	db["med_rec_requests"].update_one(query, data_update)
+
 	return render_template("incoming-request-result.html", content=tx)
 
 #route to show table of pending tx
@@ -564,14 +579,16 @@ def showOutcomingRequestPage():
 	dat = db["med_rec_requests"].find({"user_from":session["public_key"]})
 	tup = []
 	for y in dat:
+		ticket_id = "%s"%y["_id"]
 		txs = "%s"%y["tx_id"]
 		owner = "%s"%y["user_to"]
 		requester = "%s"%y["user_from"]
-		list = [txs,owner,requester]
+		status="%s"%y["status"]
+		list = [ticket_id,txs,owner,requester,status]
 		tup.append(list)
 	print(tup)
 	if tup:
-		return render_template("incoming-request-list.html", data=tup)
+		return render_template("outcoming-request-list.html", data=tup)
 	if not tup:
 		err_msg = "You do not have any outcoming requests to access medical records."
 		return render_template("error-landing-page.html",content=err_msg)
@@ -671,7 +688,7 @@ def showAppendResult():
 			}
 		}
 		metadata = {
-			'can_link':[session["public_key"]],
+			'can_link':[public_key],
 			'timestamp':timestamp,
 			'patient_meta': {
 				'anamnesis':{
@@ -734,7 +751,7 @@ def showBurn():
 #route to transfer
 @app.route("/search-transfer")
 def showSearchTransferPage():
-	return render_template("search-transfer.html")
+	return render_template("search-transfer.html",pubkey = session["public_key"])
 
 @app.route("/transfer-result", methods = ["POST"])
 def showTransferResult():
@@ -748,7 +765,8 @@ def showTransferResult():
 			"public_key":public_key,
 			"private_key":private_key
 		}
-		tf_tx = transfer_transaction(tx,user_keys,address_id)
+		meta = tx['metadata']
+		tf_tx = transfer_transaction(tx,user_keys,address_id,meta)
 		print(tf_tx)
 		return render_template("transfer-result.html",content=tx)
 	else:
